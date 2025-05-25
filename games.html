@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ক্যান্ডি ক্রাশ - লোষ্ঠী সমাজ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2&display=swap');
+
+  body {
+    font-family: 'Baloo 2', cursive;
+    background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  header {
+    margin: 1.5rem 0 1rem;
+    text-align: center;
+    color: #6d1b7b;
+    text-shadow: 1px 1px 3px #fff3;
+  }
+  header h1 {
+    font-size: 2.5rem;
+  }
+  #game-info {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #4a148c;
+  }
+  #game-board {
+    display: grid;
+    grid-template-columns: repeat(7, 50px);
+    grid-template-rows: repeat(7, 50px);
+    gap: 8px;
+    background: #ffffffcc;
+    padding: 12px;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(109, 27, 123, 0.25);
+    user-select: none;
+  }
+  .tile {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 0 10px #fff7;
+  }
+  .tile.selected {
+    box-shadow: 0 0 12px 4px #d500f9;
+    transform: scale(1.1);
+    z-index: 10;
+  }
+  /* Colors for candies */
+  .color-0 { background: #f44336; } /* red */
+  .color-1 { background: #2196f3; } /* blue */
+  .color-2 { background: #4caf50; } /* green */
+  .color-3 { background: #ffeb3b; } /* yellow */
+  .color-4 { background: #9c27b0; } /* purple */
+  .color-5 { background: #ff9800; } /* orange */
+  .color-6 { background: #00bcd4; } /* cyan */
+
+  #message {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    min-height: 28px;
+    color: #6d1b7b;
+    text-align: center;
+    text-shadow: 1px 1px 1px #fff8;
+  }
+
+  #next-level-btn {
+    margin-top: 1.2rem;
+    background: #6a1b9a;
+    border: none;
+    color: white;
+    padding: 0.6rem 1.4rem;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    box-shadow: 0 6px 12px rgba(106, 27, 154, 0.7);
+    cursor: pointer;
+    user-select: none;
+    display: none;
+  }
+  #next-level-btn:hover {
+    background: #4a148c;
+  }
+
+  /* Responsive */
+  @media (max-width: 400px) {
+    #game-board {
+      grid-template-columns: repeat(7, 40px);
+      grid-template-rows: repeat(7, 40px);
+      gap: 6px;
+      padding: 8px;
+    }
+    .tile {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+    }
+    header h1 {
+      font-size: 2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ক্যান্ডি ক্রাশ - লোষ্ঠী সমাজ</h1>
+  <div id="game-info">লেভেল: 1 &nbsp;|&nbsp; স্কোর: 0 &nbsp;|&nbsp; লক্ষ্য: 50</div>
+</header>
+
+<div id="game-board"></div>
+
+<div id="message"></div>
+<button id="next-level-btn">পরবর্তী লেভেল</button>
+
+<script>
+  const boardSize = 7;
+  const colorsCount = 7; // number of candy colors
+  const gameBoard = document.getElementById('game-board');
+  const messageEl = document.getElementById('message');
+  const nextLevelBtn = document.getElementById('next-level-btn');
+  const gameInfo = document.getElementById('game-info');
+
+  let board = [];
+  let selectedTile = null;
+  let score = 0;
+  let level = 1;
+  let targetScore = 50;
+
+  // Initialize the board with random colors
+  function initBoard() {
+    board = [];
+    for (let r = 0; r < boardSize; r++) {
+      const row = [];
+      for (let c = 0; c < boardSize; c++) {
+        row.push(randomColor());
+      }
+      board.push(row);
+    }
+    removeInitialMatches();
+    renderBoard();
+  }
+
+  function randomColor() {
+    return Math.floor(Math.random() * colorsCount);
+  }
+
+  // Remove any initial matches so board doesn't start with combos
+  function removeInitialMatches() {
+    let found;
+    do {
+      found = false;
+      for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
+          if (hasMatchAt(r, c)) {
+            board[r][c] = randomColor();
+            found = true;
+          }
+        }
+      }
+    } while(found);
+  }
+
+  // Check if a match exists at position r,c
+  function hasMatchAt(r, c) {
+    const color = board[r][c];
+    // Check horizontal 3 in a row
+    if (c >= 2) {
+      if (board[r][c-1] === color && board[r][c-2] === color) return true;
+    }
+    // Check vertical 3 in a row
+    if (r >= 2) {
+      if (board[r-1][c] === color && board[r-2][c] === color) return true;
+    }
+    return false;
+  }
+
+  function renderBoard() {
+    gameBoard.innerHTML = '';
+    for (let r = 0; r < boardSize; r++) {
+      for (let c = 0; c < boardSize; c++) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile', 'color-' + board[r][c]);
+        tile.dataset.row = r;
+        tile.dataset.col = c;
+        tile.addEventListener('click', onTileClick);
+        gameBoard.appendChild(tile);
+      }
+    }
+    updateGameInfo();
+  }
+
+  function onTileClick(e) {
+    const tile = e.currentTarget;
+    const r = parseInt(tile.dataset.row);
+    const c = parseInt(tile.dataset.col);
+
+    if (!selectedTile) {
+      selectedTile = tile;
+      tile.classList.add('selected');
+      messageEl.textContent = 'অন্য একটি পাশের টাইল নির্বাচন করুন।';
+    } else {
+      if (tile === selectedTile) {
+        selectedTile.classList.remove('selected');
+        selectedTile = null;
+        messageEl.textContent = '';
+        return;
+      }
+
+      if (areNeighbors(selectedTile, tile)) {
+        swapTiles(selectedTile, tile);
+        if (checkAndRemoveMatches()) {
+          score += 10; // give some points for a successful swap match
+          messageEl.textContent = 'ম্যাচ হয়েছে!';
+          selectedTile.classList.remove('selected');
+          selectedTile = null;
+          cascadeTiles();
+          setTimeout(() => {
+            if (score >= targetScore) {
+              messageEl.textContent = `অভিনন্দন! আপনি লেভেল ${level} সম্পন্ন করেছেন!`;
+              nextLevelBtn.style.display = 'inline-block';
+            } else {
+              messageEl.textContent = 'চালিয়ে যান, আরও বেশি স্কোর করো!';
+            }
+          }, 400);
+        } else {
+          // no match - swap back
+          messageEl.textContent = 'ম্যাচ হয়নি, আবার চেষ্টা করো!';
+          setTimeout(() => {
+            swapTiles(selectedTile, tile);
+            selectedTile.classList.remove('selected');
+            selectedTile = null;
+            messageEl.textContent = '';
+          }, 600);
+        }
+      } else {
+        messageEl.textContent = 'শুধুমাত্র পাশের টাইল পরিবর্তন করা যাবে।';
+        selectedTile.classList.remove('selected');
+        selectedTile = null;
+      }
+    }
+  }
+
+  function areNeighbors(t1, t2) {
+    const r1 = parseInt(t1.dataset.row);
+    const c1 = parseInt(t1.dataset.col);
+    const r2 = parseInt(t2.dataset.row);
+    const c2 = parseInt(t2.dataset.col);
+    return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
+  }
+
+  function swapTiles(t1, t2) {
+    const r1 = parseInt(t1.dataset.row);
+    const c1 = parseInt(t1.dataset.col);
+    const r2 = parseInt(t2.dataset.row);
+    const c2 = parseInt(t2.dataset.col);
+
+    // Swap board data
+    const temp = board[r1][c1];
+    board[r1][c1] = board[r2][c2];
+    board[r2][c2] = temp;
+
+    renderBoard();
+  }
+
+  // Check and remove all matches on the board, returns true if any match found
+  function checkAndRemoveMatches() {
+    let matchedPositions = [];
+    // horizontal matches
+    for (let r = 0; r < boardSize; r++) {
+      for (let c = 0; c < boardSize - 2; c++) {
+        const c1 = board[r][c];
+        if (c1 === board[r][c+1] && c1 === board[r][c+2]) {
+          matchedPositions.push([r,c], [r,c+1], [r,c+2]);
+          // check if more than 3 in a row
+          for (let cc = c+3; cc < boardSize; cc++) {
+            if (board[r][cc] === c1) matchedPositions.push([r,cc]);
+            else break;
+          }
+        }
+      }
+    }
+    // vertical matches
+    for (let c = 0; c < boardSize; c++) {
+      for (let r = 0; r < boardSize - 2; r++) {
+        const c1 = board[r][c];
+        if (c1 === board[r+1][c] && c1 === board[r+2][c]) {
+          matchedPositions.push([r,c], [r+1,c], [r+2,c]);
+          for (let rr = r+3; rr < boardSize; rr++) {
+            if (board[rr][c] === c1) matchedPositions.push([rr,c]);
+            else break;
+          }
+        }
+      }
+    }
+
+    if (matchedPositions.length === 0) return false;
+
+    // Remove duplicates
+    const uniquePositions = [];
+    const map = new Set();
+    for (const pos of matchedPositions) {
+      const key = pos[0] + ',' + pos[1];
+      if (!map.has(key)) {
+        uniquePositions.push(pos);
+        map.add(key);
+      }
+    }
+
+    // Remove matched candies
+    uniquePositions.forEach(([r,c]) => {
+      board[r][c] = null;
+      score += 5; // extra points per candy cleared
+    });
+
+    renderBoard();
+    return true;
+  }
+
+  // Let candies fall down to fill empty spaces
+  function cascadeTiles() {
+    for (let c = 0; c < boardSize; c++) {
+      for (let r = boardSize - 1; r >= 0; r--) {
+        if (board[r][c] === null) {
+          // look above for first non-null
+          let nr = r - 1;
+          while (nr >= 0 && board[nr][c] === null) nr--;
+          if (nr >= 0) {
+            board[r][c] = board[nr][c];
+            board[nr][c] = null;
+          } else {
+            board[r][c] = randomColor();
+          }
+        }
+      }
+    }
+    renderBoard();
+  }
+
+  function updateGameInfo() {
+    gameInfo.textContent = `লেভেল: ${level}  |  স্কোর: ${score}  |  লক্ষ্য: ${targetScore}`;
+  }
+
+  nextLevelBtn.addEventListener('click', () => {
+    level++;
+    targetScore += 50;  // increase target score per level
+    score = 0;
+    messageEl.textContent = '';
+    nextLevelBtn.style.display = 'none';
+    initBoard();
+  });
+
+  // Initial load
+  initBoard();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+/* Reset and Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.members-body {
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 2rem;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+:root {
+  --bg: #f9f9f9;
+  --text: #111;
+  --card-bg: #ffffff;
+  --glow-color: #007bff;
+}
+
+body.dark-mode {
+  --bg: #121212;
+  --text: #ffffff;
+  --card-bg: #1e1e1e;
+  --glow-color: #00ffee;
+}
+
+/* Animated Title Logo */
+.logo-glow {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: var(--glow-color);
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px var(--glow-color),
+                 0 0 20px var(--glow-color),
+                 0 0 30px var(--glow-color);
+  }
+  to {
+    text-shadow: 0 0 20px var(--glow-color),
+                 0 0 30px var(--glow-color),
+                 0 0 40px var(--glow-color);
+  }
+}
+
+/* Member Cards Grid */
+.member-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.member-card {
+  background-color: var(--card-bg);
+  padding: 1.2rem;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.member-card:hover {
+  transform: scale(1.05);
+  background-color: rgba(0, 123, 255, 0.1);
+  box-shadow: 0 12px 24px rgba(0, 123, 255, 0.2);
+}
+
+/* Light/Dark Toggle */
+.toggle-switch {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  background: var(--card-bg);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-switch label {
+  cursor: pointer;
+  width: 40px;
+  height: 20px;
+  background: gray;
+  display: block;
+  border-radius: 20px;
+  position: relative;
+}
+
+.toggle-switch label::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 1px;
+  left: 1px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input[type="checkbox"]:checked + label {
+  background: #007bff;
+}
+
+.toggle-switch input[type="checkbox"]:checked + label::after {
+  transform: translateX(20px);
+}
+
+/* Footer */
+footer {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text);
+  padding: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>লোষ্ঠী সমাজ গ্রুপ চ্যাট</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #121212;
+      color: #eee;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+      background: #1f1f1f;
+      box-shadow: 0 0 15px #000;
+      overflow: hidden;
+    }
+    header {
+      background: #222;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffcc00;
+    }
+    #users-list {
+      background: #292929;
+      padding: 1rem;
+      color: #ccc;
+      height: 100%;
+      overflow-y: auto;
+    }
+    #users-list h5 {
+      margin-bottom: 0.75rem;
+      color: #ffcc00;
+    }
+    #chat-window {
+      background: #121212;
+      flex-grow: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      color: #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .message {
+      max-width: 70%;
+      padding: 0.6rem 1rem;
+      border-radius: 20px;
+      word-wrap: break-word;
+      display: inline-block;
+      font-size: 1rem;
+      line-height: 1.3;
+      user-select: text;
+    }
+    .message.self {
+      background: #ffcc00;
+      color: #222;
+      margin-left: auto;
+      text-align: right;
+    }
+    .message.other {
+      background: #333;
+      color: #eee;
+      margin-right: auto;
+      text-align: left;
+    }
+    .message.system {
+      margin: 0 auto;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: #aaa;
+      background: transparent;
+      max-width: 100%;
+      text-align: center;
+      border-radius: 0;
+    }
+    #chat-form {
+      display: flex;
+      padding: 1rem;
+      background: #222;
+      gap: 0.5rem;
+    }
+    #chat-input {
+      flex-grow: 1;
+      border-radius: 20px;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      outline: none;
+    }
+    #chat-input:focus {
+      box-shadow: 0 0 8px #ffcc00;
+    }
+    #send-btn {
+      background: #ffcc00;
+      border: none;
+      border-radius: 20px;
+      padding: 0 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      color: #222;
+      transition: background 0.3s ease;
+    }
+    #send-btn:hover {
+      background: #e6b800;
+    }
+    #emoji-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #ffcc00;
+      padding: 0 0.5rem;
+      user-select: none;
+    }
+    #image-upload {
+      display: none;
+    }
+    #image-label {
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #ffcc00;
+      user-select: none;
+    }
+    #nickname-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+    #nickname-modal > div {
+      background: #222;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      color: #eee;
+    }
+    #nickname-input {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 1rem;
+      outline: none;
+    }
+    #nickname-submit {
+      background: #ffcc00;
+      border: none;
+      padding: 0.6rem 2rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #222;
+      transition: background 0.3s ease;
+    }
+    #nickname-submit:hover {
+      background: #e6b800;
+    }
+    /* Scrollbar for chat window */
+    #chat-window::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chat-window::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 4px;
+    }
+    #users-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    #users-list::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 4px;
+    }
+
+    /* Layout */
+    .main-content {
+      display: flex;
+      height: 100%;
+      gap: 0.5rem;
+    }
+    #users-list {
+      width: 180px;
+      flex-shrink: 0;
+    }
+    #chat-section {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Images in chat */
+    .message img {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>লোষ্ঠী সমাজ গ্রুপ চ্যাট</header>
+
+    <div class="main-content">
+      <aside id="users-list">
+        <h5>লাইভ সদস্যগণ</h5>
+        <ul id="members-ul" class="list-unstyled"></ul>
+      </aside>
+
+      <section id="chat-section">
+        <div id="chat-window"></div>
+
+        <form id="chat-form">
+          <button type="button" id="emoji-btn" title="ইমোজি">&#128512;</button>
+          <input type="text" id="chat-input" placeholder="মেসেজ টাইপ করো..." autocomplete="off" required />
+          <label for="image-upload" id="image-label" title="ছবি আপলোড">&#128247;</label>
+          <input type="file" id="image-upload" accept="image/*" />
+          <button type="submit" id="send-btn">পাঠাও</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Removed nickname modal elements and handlers
+
+    const membersUl = document.getElementById('members-ul');
+    const chatWindow = document.getElementById('chat-window');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const emojiBtn = document.getElementById('emoji-btn');
+    const imageUpload = document.getElementById('image-upload');
+
+    let nickname = '';
+
+    // Auto-generate a nickname immediately and emit it
+    function generateNickname() {
+      const adjectives = ['বুদ্ধিমান', 'মজাদার', 'সাহসী', 'দয়ালু', 'দক্ষ'];
+      const animals = ['হাতি', 'বাঘ', 'ময়ূর', 'শিয়াল', 'হরিণ'];
+      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const animal = animals[Math.floor(Math.random() * animals.length)];
+      const number = Math.floor(Math.random() * 1000);
+      return `${adj}_${animal}_${number}`;
+    }
+
+    nickname = generateNickname();
+    socket.emit('set nickname', nickname);
+
+    // Helper to add message to chat window
+    function addMessage({ nickname: sender, message, system = false, self = false }) {
+      const div = document.createElement('div');
+      div.classList.add('message');
+      if (system) {
+        div.classList.add('system');
+        div.textContent = message;
+      } else {
+        div.classList.add(self ? 'self' : 'other');
+        if (isImage(message)) {
+          div.innerHTML = `<strong>${sender}:</strong><br><img src="${message}" alt="Sent Image" />`;
+        } else {
+          div.textContent = `${sender}: ${message}`;
+        }
+      }
+      chatWindow.appendChild(div);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // Detect if string is base64 image or URL to image
+    function isImage(str) {
+      return str.startsWith('data:image') || /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(str);
+    }
+
+    // Update live members list
+    function updateMembers(members) {
+      membersUl.innerHTML = '';
+      members.forEach(m => {
+        const li = document.createElement('li');
+        li.textContent = m;
+        membersUl.appendChild(li);
+      });
+    }
+
+    // Handle chat form submit
+    chatForm.onsubmit = (e) => {
+      e.preventDefault();
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      socket.emit('chat message', msg);
+      addMessage({ nickname, message: msg, self: true });
+      chatInput.value = '';
+    };
+
+    // Emoji picker
+    emojiBtn.onclick = () => {
+      chatInput.value += '😊';
+      chatInput.focus();
+    };
+
+    // Image upload handling
+    imageUpload.onchange = () => {
+      const file = imageUpload.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('ছবি ফাইল নির্বাচন করুন');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        socket.emit('chat message', reader.result);
+        addMessage({ nickname, message: reader.result, self: true });
+      };
+      reader.readAsDataURL(file);
+      imageUpload.value = '';
+    };
+
+    // Listen for chat messages from server
+    socket.on('chat message', ({ nickname: sender, message }) => {
+      if (sender === nickname) return; // Don't duplicate self messages
+      addMessage({ nickname: sender, message });
+    });
+
+    // Listen for system messages
+    socket.on('system message', (msg) => {
+      addMessage({ message: msg, system: true });
+    });
+
+    // Update user list live
+    socket.on('update users', (members) => {
+      updateMembers(members);
+    });
+  </script>
+</body>
+</html>
