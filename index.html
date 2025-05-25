@@ -9,6 +9,38 @@
 </head>
 <body>
 
+  <style>
+  body {
+    background-image: url('/assets/img/new2.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      background-position: center top;
+      background-size: contain;
+    }
+
+    .main-section {
+      background-color: rgba(0, 0, 0, 0.6); /* Make text readable */
+      padding: 2rem 1rem;
+    }
+  }
+
+  .main-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 1px 1px 3px #000;
+  }
+</style>
+
+
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
     <div class="container">
